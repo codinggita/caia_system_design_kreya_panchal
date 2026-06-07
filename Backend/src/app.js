@@ -1,0 +1,46 @@
+import express from 'express';
+import apiRouter from './routes/index.js';
+
+const app = express();
+
+// Enable standard parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Custom CORS middleware to avoid external packages
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Global API Prefix /api/v1
+app.use('/api/v1', apiRouter);
+
+// 404 Not Found Middleware
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: `Cannot find ${req.method} ${req.originalUrl} on this server`,
+  });
+});
+
+// Global Error-Handling Middleware
+app.use((err, req, res, next) => {
+  const statusCode = err.status || err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+
+  console.error(`[Error Log] ${req.method} ${req.originalUrl} - ${statusCode} - ${err.stack}`);
+
+  res.status(statusCode).json({
+    success: false,
+    message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+export default app;
