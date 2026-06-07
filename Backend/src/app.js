@@ -1,5 +1,6 @@
 import express from 'express';
 import apiRouter from './routes/index.js';
+import categoryRouter, { subcategoryRouter, tagRouter, patternRouter } from './routes/categoryRoutes.js';
 
 const app = express();
 
@@ -20,6 +21,12 @@ app.use((req, res, next) => {
 
 // Global API Prefix /api/v1
 app.use('/api/v1', apiRouter);
+
+// Category & Taxonomy Routes
+app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/subcategories', subcategoryRouter);
+app.use('/api/v1/tags', tagRouter);
+app.use('/api/v1/patterns', patternRouter);
 
 // 404 Not Found Middleware
 app.use((req, res, next) => {
